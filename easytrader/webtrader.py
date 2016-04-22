@@ -27,13 +27,11 @@ class WebTrader(object):
     global_config_path = os.path.dirname(__file__) + '/config/global.json'
     config_path = ''
 
-    def __init__(self,setting_max_number_to_Login=20):
+    def __init__(self):
         self.__read_config()
         self.trade_prefix = self.config['prefix']
         self.account_config = ''
         self.heart_active = True
-        self.setting_max_number_to_Login=setting_max_number_to_Login
-        self.max_number_to_Login=setting_max_number_to_Login
         if six.PY2:
             self.heart_thread = Thread(target=self.send_heartbeat)
             self.heart_thread.setDaemon(True)
@@ -51,21 +49,22 @@ class WebTrader(object):
 
     def prepare(self, need_data):
         """登录的统一接口
-        :param need_data 登录所需数据"""
+        :param need_data 登录所需数据
+        """
         self.read_config(need_data)
         self.autologin()
 
-    def autologin(self):
-        """实现自动登录"""
-        is_login_ok=False
-        while(not is_login_ok):
-            self.max_number_to_Login-=1
-            if self.max_number_to_Login==0:
-                log.error('%s\n'%('登录失败！远端服务器可能正在维护。'))
-                raise Exception('%s\n'%('登录失败！远端服务器可能正在维护。'))
-            is_login_ok=self.login()
-            
-        self.max_number_to_Login=self.setting_max_number_to_Login
+    def autologin(self, limit=10,interval_time=2):
+        """实现自动登录
+        :param limit: 登录次数限制
+        """
+        for _ in range(limit):
+            if self.login():
+                break
+            else:
+                time.sleep(interval_time)
+        else:
+            raise NotLoginError('登录失败次数过多, 请检查密码是否正确 / 券商服务器是否处于维护中 / 网络连接是否正常')
         self.keepalive()
 
     def login(self):
@@ -160,6 +159,15 @@ class WebTrader(object):
         """
         # TODO 目前仅在 华泰子类 中实现
         log.info('目前仅在 华泰子类 中实现, 其余券商需要补充')
+
+    def ipo_enable_amount(self, stock_code):
+        """
+        获取新股可申购额度
+        :param stock_code: 股票 ID
+        :return:
+        """
+        # TODO 目前仅在 佣金宝 中实现
+        log.info('目前仅在 佣金宝子类 中实现, 其余券商需要补充')
 
     def do(self, params):
         """发起对 api 的请求并过滤返回结果
