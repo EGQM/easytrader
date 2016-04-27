@@ -54,22 +54,13 @@ class WebTrader(object):
         self.read_config(need_data)
         self.autologin()
 
-<<<<<<< HEAD
-    def autologin(self, limit=10,interval_time=2):
-=======
     def autologin(self, limit=10):
->>>>>>> df427d0b814106cfbfa666f1b87b87718628d585
         """实现自动登录
         :param limit: 登录次数限制
         """
         for _ in range(limit):
             if self.login():
                 break
-<<<<<<< HEAD
-            else:
-                time.sleep(interval_time)
-=======
->>>>>>> df427d0b814106cfbfa666f1b87b87718628d585
         else:
             raise NotLoginError('登录失败次数过多, 请检查密码是否正确 / 券商服务器是否处于维护中 / 网络连接是否正常')
         self.keepalive()
